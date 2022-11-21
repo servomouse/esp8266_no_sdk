@@ -5,7 +5,10 @@
 //#include <math.h>
 
 // TODO: Use float number (related to 8) to fix the drift
-#define call_delay_us(time) { asm volatile("mov.n a2, %0\n_call0 delay4clk" : : "r"(time * (MAIN_MHZ / 8)) : "a2" ); }
+inline void call_delay_us(uint32_t time)
+{
+	asm volatile("mov.n a2, %0\n_call0 delay4clk" : : "r"(time * (MAIN_MHZ / 8)) : "a2" );
+}
 
 int is_prime(unsigned int n) {
    	if (n <= 1) {

@@ -28,18 +28,10 @@ compiler_flags = ["-flto",
                   "-DMAIN_MHZ=346",
                   "-mno-serialize-volatile",
                   "-mlongcalls",
-                  "-g",
-                  "-c"]
+                  "-g"]
 
 linker_flags = [f"-T {linker_script}",
-                "-flto",
-                  "-Ofast",
-                  "-Iinclude",
-                  "-DMAIN_MHZ=346",
-                  "-mno-serialize-volatile",
-                  "-mlongcalls",
-                  "-g",
-                # "--print-memory-usage",
+                "-Wl,--print-memory-usage",
                 ]
 
 
@@ -48,12 +40,8 @@ def compile(input_file:str) -> int:
     print(f"file: {input_file}", flush=True)
     time.sleep(0.1)
     output_file = f"temp_files/{input_file.split('/')[-1].split('.')[0]}.o"
-    c_string = f'{compiler_path} {" ".join(compiler_flags)} {input_file} -o {output_file}'
+    c_string = f'{compiler_path} {" ".join(compiler_flags)} -c {input_file} -o {output_file}'
     return subprocess.call(c_string,shell=True)
-
-# /media/master/0E5513DF0E5513DF/Work/esp8266/Toolchain/xtensa-lx106-elf-gcc8_4_0-esp-2020r3-linux-amd64/xtensa-lx106-elf/bin/xtensa-lx106-elf-gcc -flto -Ofast -Iinclude -DMAIN_MHZ=346 -mno-serialize-volatile -mlongcalls -g -S -c main.c -o temp_files/main.o
-
-# /media/master/0E5513DF0E5513DF/Work/esp8266/Toolchain/xtensa-lx106-elf-gcc8_4_0-esp-2020r3-linux-amd64/xtensa-lx106-elf/bin/xtensa-lx106-elf-gcc  -flto -Ofast -Iinclude -DMAIN_MHZ=346 -mno-serialize-volatile -mlongcalls -g  main.c src/delay.S src/nosdk8266.c -T ld/linkerscript.ld -T ld/addresses.ld -o image.elf
 
 
 def compile_all(files:list):
@@ -67,7 +55,7 @@ def compile_all(files:list):
 
 
 def link_all(files:list):
-    l_string = f'{compiler_path} {" ".join(linker_flags)} {" ".join(files)} -o temp_files/{output_file_name}.elf'
+    l_string = f'{compiler_path} {" ".join(compiler_flags)} {" ".join(linker_flags)} {" ".join(files)} -o temp_files/{output_file_name}.elf'
     retval = subprocess.call(l_string, shell=True)
     if retval == 1:
         print(colored("linking error", 'red'))
@@ -86,12 +74,9 @@ def get_files(path:str, filetype:str)->list:
 
 
 def convert_elf():
-    # subprocess.call(f'{objcopy_path} -O ihex main.elf main.hex', shell=True)
-    # subprocess.call(f'{objcopy_path} -O binary main.elf main.bin', shell=True)
-    e_string = f'esptool elf2image -e 1 temp_files/{output_file_name}.elf -o {output_file_name}.bin'
+    e_string = f'esptool elf2image -e 1 -o {output_file_name}.bin temp_files/{output_file_name}.elf'
     print(e_string)
     subprocess.call(e_string, shell=True)
-    # subprocess.call(f'{esptool2} -quiet -bin -boot0 -4096 -qio -40 temp_files/main.elf {output_file_name}.bin .text .rodata', shell=True)
     print(colored(f"file {output_file_name}.bin ready to be uploaded at address 0x00000000", 'green'))
 
 

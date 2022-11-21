@@ -1,0 +1,27 @@
+{
+    "files.associations": {
+        "gpio.h": "c",
+        "stdint.h": "c",
+        "eagle_soc.h": "c",
+        "esp_err.h": "c",
+        "assert.h": "c",
+        "features.h": "c",
+        "soc.h": "c",
+        "pin_mux_register.h": "c",
+        "gpio_register.h": "c",
+        "ets_sys.h": "c",
+        "esp_system.h": "c",
+        "uart.h": "c",
+        "hw_timer.h": "c",
+        "timer_struct.h": "c",
+        "timer.h": "c",
+        "esp_attr.h": "c",
+        "std_datatypes.h": "c",
+        "simpleesp8266.h": "c",
+        "esp_heap_caps.h": "c",
+        "esp_heap_config.h": "c",
+        "esp_heap_trace.h": "c",
+        "esp_heap_caps_priv.h": "c",
+        "board.h": "c"
+    }
+}
