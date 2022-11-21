@@ -74,9 +74,10 @@ def get_files(path:str, filetype:str)->list:
 
 
 def convert_elf():
-    e_string = f'esptool elf2image -e 1 -o {output_file_name}.bin temp_files/{output_file_name}.elf'
+    e_string = f'esptool elf2image temp_files/{output_file_name}.elf -o {output_file_name}.bin'
     print(e_string)
     subprocess.call(e_string, shell=True)
+    os.rename(f'{output_file_name}.bin0x00000.bin', f'{output_file_name}.bin')
     print(colored(f"file {output_file_name}.bin ready to be uploaded at address 0x00000000", 'green'))
 
 
