@@ -25,7 +25,7 @@ linker_script = "ld/linkerscript.ld -T ld/addresses.ld"
 compiler_flags = ["-flto",
                   "-Ofast",
                   "-Iinclude",
-                  "-DMAIN_MHZ=346",
+                  "-DMAIN_MHZ=160",
                   "-mno-serialize-volatile",
                   "-mlongcalls",
                   "-g"]

@@ -2,6 +2,7 @@
 #include "esp8266_auxrom.h"
 #include "eagle_soc.h"
 #include "nosdk8266.h"
+#include "timer.h"
 //#include <math.h>
 
 // TODO: Use float number (related to 8) to fix the drift
@@ -10,52 +11,71 @@ inline void call_delay_us(uint32_t time)
 	asm volatile("mov.n a2, %0\n_call0 delay4clk" : : "r"(time * (MAIN_MHZ / 8)) : "a2" );
 }
 
-int is_prime(unsigned int n) {
-   	if (n <= 1) {
-   		return 0; // zero and one are not prime
-   	}
-   	unsigned int i = 0;
-   	for (i = 2; i * i <= n; i++) {
-       	if (n % i == 0) {
-       		return 0;
-       	}
-    }
-    return 1;
-}  
+#define DELAY 1000 /* milliseconds */
+
+LOCAL os_timer_t blink_timer;
+
+
+void   hw_test_timer_cb(void)
+{
+	static uint8_t led_state=1;
+	if(led_state == 0)
+	{
+		PIN_OUT_SET = _BV(2); //Turn GPIO2 light on.
+		led_state = 1;
+	}
+	else
+	{
+		PIN_OUT_CLEAR = _BV(2); //Turn GPIO2 light off.
+		led_state = 0;
+	}
+}
+
+LOCAL void ICACHE_FLASH_ATTR blink_cb(void *arg)
+{
+	static uint8_t led_state=1;
+	if(led_state == 0)
+	{
+		PIN_OUT_SET = _BV(2); //Turn GPIO2 light on.
+		led_state = 1;
+	}
+	else
+	{
+		PIN_OUT_CLEAR = _BV(2); //Turn GPIO2 light off.
+		led_state = 0;
+	}
+} 
 
 int main() {
 	int i = 0;
 	nosdk8266_init();
 
-	//int j = 0, primes = 0, p_to_search = 100000;
-	//call_delay_us(5000000);
-	//printf("START\n");
-	//for (j = 0; j <= p_to_search; j++) {
-	//	if (is_prime(j) == 1) {
-	//		primes++;
-	//	}
-	//}
-	//printf("END (%d / %d are prime numbers)", primes, p_to_search);
-
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U,FUNC_GPIO2);
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO5_U,FUNC_GPIO5);
 	PIN_DIR_OUTPUT = _BV(2); //Enable GPIO2 light off.
 
-	//call_delay_us( 3000000 );
-	//int j = 0;
-	//for (j = 0; j < 200; j++) {
-	//	uart_div_modify(0, (j * 1000000) / 115200);
-	//	printf("pllworkingfreq: %d ", j);
-	//}
+	// Set up a timer to blink the LED
+	// os_timer_disarm(ETSTimer *ptimer)
+	// timer_disarm(&blink_timer);
+	// os_timer_setfn(ETSTimer *ptimer, ETSTimerFunc *pfunction, void *parg)
+	// timer_setfn(&blink_timer, (os_timer_func_t *)blink_cb, (void *)0);
+	// void os_timer_arm(ETSTimer *ptimer,uint32_t milliseconds, bool repeat_flag)
+	// timer_arm(&blink_timer, DELAY, 1);
+	hw_timer_init(FRC1_SOURCE, 1);
+    hw_timer_set_func(hw_test_timer_cb);
+    hw_timer_arm(500);
 
-	while(1) {
-		PIN_OUT_SET = _BV(2); //Turn GPIO2 light off.
+	// timer_attach(DELAY, 1, (os_timer_func_t *)blink_cb, (void *)0);
+
+	while(1)
+	{
+		// PIN_OUT_SET = _BV(2); //Turn GPIO2 light on.
 		call_delay_us(500000);
-		float aa = 12.34;
-		printf("float test: %f\n", aa);
+		// float aa = 12.34;
+		// printf("float test: %f\n", aa);
 		printf("Hello World %d\n", i);
 		// printf("PLL divider register values: (1)0x%x | (2)0x%x\n", rom_i2c_readReg(103, 4, 1), rom_i2c_readReg(103, 4, 2));
-		PIN_OUT_CLEAR = _BV(2); //Turn GPIO2 light off.
+		// PIN_OUT_CLEAR = _BV(2); //Turn GPIO2 light off.
 		call_delay_us(500000);
 		i++;
 	}

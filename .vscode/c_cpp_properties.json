@@ -10,7 +10,7 @@
         "intelliSenseMode": "clang-x64",
         "includePath": ["${myDefaultIncludePath}"],
         // "macFrameworkPath": ["/System/Library/Frameworks"],
-        "defines": ["FOO", "MAIN_MHZ=346"],
+        "defines": ["FOO", "MAIN_MHZ=160"],
         // "forcedInclude": ["${workspaceFolder}/include/config.h"],
         // "compilerPath": "/usr/bin/clang",
         "cStandard": "c11",
