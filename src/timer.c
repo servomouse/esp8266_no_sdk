@@ -2,12 +2,21 @@
 // #include "timer_register.h"
 #include "eagle_soc.h"
 
-#define US_TO_RTC_TIMER_TICKS(t)          \
-    ((t) ?                                   \
-     (((t) > 0x35A) ?                   \
-      (((t)>>2) * ((APB_CLK_FREQ>>4)/250000) + ((t)&0x3) * ((APB_CLK_FREQ>>4)/1000000))  :    \
-      (((t) *(APB_CLK_FREQ>>4)) / 1000000)) :    \
-     0)
+uint32_t us_to_ticks(uint32_t val)
+{
+    if(val > 0)
+    {
+        if(val > 0x35A)
+            return ((val>>2) * ((APB_CLK_FREQ>>4)/250000) + (val&0x3) * ((APB_CLK_FREQ>>4)/1000000));
+        else
+            return ((val * (APB_CLK_FREQ>>4)) / 1000000);
+    }
+    return 0;
+}
+
+#define US_TO_RTC_TIMER_TICKS(t) \
+  ((t) ? (((t) > 0x35A) ? (((t)>>2) * ((APB_CLK_FREQ>>4)/250000) + \
+     ((t)&0x3) * ((APB_CLK_FREQ>>4)/1000000)) : (((t) *(APB_CLK_FREQ>>4)) / 1000000)) : 0)
 
 
 #define FRC1_ENABLE_TIMER  BIT7
@@ -28,7 +37,7 @@ in non autoload mode:
 *******************************************************************************/
 void  hw_timer_arm(uint32_t val)
 {
-    RTC_REG_WRITE(FRC1_LOAD_ADDRESS, US_TO_RTC_TIMER_TICKS(val));
+    RTC_REG_WRITE(FRC1_LOAD_ADDRESS, us_to_ticks(val));
 }
 
 static void (* user_hw_timer_cb)(void) = NULL;
@@ -46,7 +55,8 @@ void  hw_timer_set_func(void (* user_hw_timer_cb_set)(void))
 
 static void  hw_timer_isr_cb(void * param)
 {
-    if (user_hw_timer_cb != NULL) {
+    if (user_hw_timer_cb != NULL)
+    {
         (*(user_hw_timer_cb))();
     }
 }
@@ -63,25 +73,14 @@ u8 req:
                         1,  autoload mode,
 * Returns      : NONE
 *******************************************************************************/
-void ICACHE_FLASH_ATTR hw_timer_init(FRC1_TIMER_SOURCE_TYPE source_type, u8 req)
+void ICACHE_FLASH_ATTR hw_timer_init(bool repeat)
 {
-    if (req == 1) {
-        RTC_REG_WRITE(FRC1_CTRL_ADDRESS,
-                      FRC1_AUTO_LOAD | DIVDED_BY_16 | FRC1_ENABLE_TIMER | TM_EDGE_INT);
-    } else {
-        RTC_REG_WRITE(FRC1_CTRL_ADDRESS,
-                      DIVDED_BY_16 | FRC1_ENABLE_TIMER | TM_EDGE_INT);
-    }
-
-    if (source_type == NMI_SOURCE)
-    {
-        return;
-        // ETS_FRC_TIMER1_NMI_INTR_ATTACH(hw_timer_isr_cb);
-    }
+    if (repeat)
+        RTC_REG_WRITE(FRC1_CTRL_ADDRESS, FRC1_AUTO_LOAD | DIVDED_BY_16 | FRC1_ENABLE_TIMER | TM_EDGE_INT);
     else
-    {
-        ETS_FRC_TIMER1_INTR_ATTACH(hw_timer_isr_cb, NULL);
-    }
+        RTC_REG_WRITE(FRC1_CTRL_ADDRESS, DIVDED_BY_16 | FRC1_ENABLE_TIMER | TM_EDGE_INT);
+    
+    ETS_FRC_TIMER1_INTR_ATTACH(hw_timer_isr_cb, NULL);
 
     TM1_EDGE_INT_ENABLE();
     ETS_FRC1_INTR_ENABLE();

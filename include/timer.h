@@ -79,7 +79,7 @@ typedef enum {
     NMI_SOURCE = 1,
 } FRC1_TIMER_SOURCE_TYPE;
 
-void ICACHE_FLASH_ATTR hw_timer_init(FRC1_TIMER_SOURCE_TYPE source_type, u8 req);
+void ICACHE_FLASH_ATTR hw_timer_init(bool repeat);
 void  hw_timer_arm(uint32_t val);
 void  hw_timer_set_func(void (* user_hw_timer_cb_set)(void));
 

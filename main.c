@@ -15,8 +15,7 @@ inline void call_delay_us(uint32_t time)
 
 LOCAL os_timer_t blink_timer;
 
-
-void   hw_test_timer_cb(void)
+void hw_test_timer_cb(void)
 {
 	static uint8_t led_state=1;
 	if(led_state == 0)
@@ -44,7 +43,7 @@ LOCAL void ICACHE_FLASH_ATTR blink_cb(void *arg)
 		PIN_OUT_CLEAR = _BV(2); //Turn GPIO2 light off.
 		led_state = 0;
 	}
-} 
+}
 
 int main() {
 	int i = 0;
@@ -61,9 +60,9 @@ int main() {
 	// timer_setfn(&blink_timer, (os_timer_func_t *)blink_cb, (void *)0);
 	// void os_timer_arm(ETSTimer *ptimer,uint32_t milliseconds, bool repeat_flag)
 	// timer_arm(&blink_timer, DELAY, 1);
-	hw_timer_init(FRC1_SOURCE, 1);
+	hw_timer_init(true);
     hw_timer_set_func(hw_test_timer_cb);
-    hw_timer_arm(500);
+    hw_timer_arm(500000);
 
 	// timer_attach(DELAY, 1, (os_timer_func_t *)blink_cb, (void *)0);
 
