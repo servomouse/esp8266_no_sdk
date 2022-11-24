@@ -13,7 +13,26 @@ inline void call_delay_us(uint32_t time)
 
 #define DELAY 1000 /* milliseconds */
 
+#define PWM_0_OUT_IO_MUX PERIPHS_IO_MUX_MTDI_U
+#define PWM_0_OUT_IO_NUM 12
+#define PWM_0_OUT_IO_FUNC FUNC_GPIO12
+
+#define PWM_1_OUT_IO_MUX PERIPHS_IO_MUX_MTDO_U
+#define PWM_1_OUT_IO_NUM 15
+#define PWM_1_OUT_IO_FUNC FUNC_GPIO15
+
+#define PWM_2_OUT_IO_MUX PERIPHS_IO_MUX_MTCK_U
+#define PWM_2_OUT_IO_NUM 13
+#define PWM_2_OUT_IO_FUNC FUNC_GPIO13
+
 LOCAL os_timer_t blink_timer;
+
+uint32 io_info[][3] = {   {PWM_0_OUT_IO_MUX,PWM_0_OUT_IO_FUNC,PWM_0_OUT_IO_NUM},
+       	                  {PWM_1_OUT_IO_MUX,PWM_1_OUT_IO_FUNC,PWM_1_OUT_IO_NUM},
+               	          {PWM_2_OUT_IO_MUX,PWM_2_OUT_IO_FUNC,PWM_2_OUT_IO_NUM},
+			};
+
+u32 duty[3] = {600,604,634};
 
 void hw_test_timer_cb(void)
 {
@@ -53,18 +72,15 @@ int main() {
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO5_U,FUNC_GPIO5);
 	PIN_DIR_OUTPUT = _BV(2); //Enable GPIO2 light off.
 
-	// Set up a timer to blink the LED
-	// os_timer_disarm(ETSTimer *ptimer)
-	// timer_disarm(&blink_timer);
-	// os_timer_setfn(ETSTimer *ptimer, ETSTimerFunc *pfunction, void *parg)
-	// timer_setfn(&blink_timer, (os_timer_func_t *)blink_cb, (void *)0);
-	// void os_timer_arm(ETSTimer *ptimer,uint32_t milliseconds, bool repeat_flag)
-	// timer_arm(&blink_timer, DELAY, 1);
+	// timer example
 	hw_timer_init(true);
     hw_timer_set_func(hw_test_timer_cb);
     hw_timer_arm(500000);
 
-	// timer_attach(DELAY, 1, (os_timer_func_t *)blink_cb, (void *)0);
+	// PWM example
+	// pwm_init(1000, duty, 3, io_info);
+	// pwm_start();
+
 
 	while(1)
 	{

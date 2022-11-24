@@ -22,6 +22,8 @@
         "esp_heap_config.h": "c",
         "esp_heap_trace.h": "c",
         "esp_heap_caps_priv.h": "c",
-        "board.h": "c"
+        "board.h": "c",
+        "i2c.h": "c",
+        "osapi.h": "c"
     }
 }
