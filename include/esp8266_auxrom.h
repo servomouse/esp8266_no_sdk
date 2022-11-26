@@ -14,7 +14,7 @@ typedef struct{
 
 extern SpiFlashChip * flashchip; //don't forget: flashchip->chip_size = 0x01000000;
 
-void ets_delay_us( uint32_t us );
+// void ets_delay_us( uint32_t us );
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 

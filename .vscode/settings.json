@@ -24,6 +24,8 @@
         "esp_heap_caps_priv.h": "c",
         "board.h": "c",
         "i2c.h": "c",
-        "osapi.h": "c"
+        "osapi.h": "c",
+        "spi.h": "c",
+        "spi_overlap.h": "c"
     }
 }

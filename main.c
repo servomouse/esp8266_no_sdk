@@ -3,13 +3,8 @@
 #include "eagle_soc.h"
 #include "nosdk8266.h"
 #include "timer.h"
+#include "spi.h"
 //#include <math.h>
-
-// TODO: Use float number (related to 8) to fix the drift
-inline void call_delay_us(uint32_t time)
-{
-	asm volatile("mov.n a2, %0\n_call0 delay4clk" : : "r"(time * (MAIN_MHZ / 8)) : "a2" );
-}
 
 #define DELAY 1000 /* milliseconds */
 
@@ -49,27 +44,27 @@ void hw_test_timer_cb(void)
 	}
 }
 
-LOCAL void ICACHE_FLASH_ATTR blink_cb(void *arg)
+void ICACHE_FLASH_ATTR spi_init()
 {
-	static uint8_t led_state=1;
-	if(led_state == 0)
-	{
-		PIN_OUT_SET = _BV(2); //Turn GPIO2 light on.
-		led_state = 1;
-	}
-	else
-	{
-		PIN_OUT_CLEAR = _BV(2); //Turn GPIO2 light off.
-		led_state = 0;
-	}
+    spi_test_init();
+}
+
+void spi_master_write(uint8_t *data, uint32_t len)
+{
+	SET_PERI_REG_MASK(SPI_PIN(SPI), SPI_CS_DIS);
+
+	for(typeof(len)i=0; i<len; i++)
+		spi_mast_byte_write(HSPI, data[i]);
+	
+	CLEAR_PERI_REG_MASK(SPI_PIN(SPI), SPI_CS_DIS);
 }
 
 int main() {
 	int i = 0;
 	nosdk8266_init();
 
-	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U,FUNC_GPIO2);
-	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO5_U,FUNC_GPIO5);
+	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
+	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO5_U, FUNC_GPIO5);
 	PIN_DIR_OUTPUT = _BV(2); //Enable GPIO2 light off.
 
 	// timer example
@@ -80,6 +75,10 @@ int main() {
 	// PWM example
 	// pwm_init(1000, duty, 3, io_info);
 	// pwm_start();
+
+	// SPI master example
+	spi_master_init(HSPI);
+	spi_mast_byte_write(HSPI,0xAA);
 
 
 	while(1)

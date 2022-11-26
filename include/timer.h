@@ -7,6 +7,12 @@
 extern "C" {
 #endif
 
+// simple blocking delay
+inline void call_delay_us(uint32_t time)
+{
+	asm volatile("mov.n a2, %0\n_call0 delay4clk" : : "r"(time * (MAIN_MHZ / 8)) : "a2" );
+}
+
 /* timer related */
 typedef void os_timer_func_t(void *timer_arg);
 typedef void (*callback_with_arg_t)(void*);

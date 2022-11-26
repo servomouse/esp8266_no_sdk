@@ -97,11 +97,11 @@ i2c_start(void)
 {
     i2c_sda(1);
     i2c_sck(1);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     i2c_sda(0);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     i2c_sck(0);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
 }
 
 /**
@@ -110,11 +110,11 @@ i2c_start(void)
 void ICACHE_FLASH_ATTR
 i2c_stop(void)
 {
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     i2c_sck(1);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     i2c_sda(1);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
 }
 
 /**
@@ -127,7 +127,7 @@ void ICACHE_FLASH_ATTR
 i2c_send_ack(uint8 state)
 {
     i2c_sck(0);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     //Set SDA 
     //  HIGH for NACK
     //  LOW  for ACK
@@ -135,14 +135,14 @@ i2c_send_ack(uint8 state)
 
     //Pulse the SCK
     i2c_sck(0);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     i2c_sck(1);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     i2c_sck(0);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
 
     i2c_sda(1);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
 }
 
 /**
@@ -156,20 +156,20 @@ i2c_check_ack(void)
 {
     uint8 ack;
     i2c_sda(1);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     i2c_sck(0);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     i2c_sck(1);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
 
     //Get SDA pin status
     ack = i2c_read(); 
 
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     i2c_sck(0);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     i2c_sda(0);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
 
     return (ack?0:1);
 }
@@ -189,21 +189,21 @@ i2c_readByte(void)
 
     for (i = 0; i < 8; i++)
     {
-        os_delay_us(I2C_SLEEP_TIME);
+        ets_delay_us(I2C_SLEEP_TIME);
         i2c_sck(0);
-        os_delay_us(I2C_SLEEP_TIME);
+        ets_delay_us(I2C_SLEEP_TIME);
 
         i2c_sck(1);
-        os_delay_us(I2C_SLEEP_TIME);
+        ets_delay_us(I2C_SLEEP_TIME);
 
         data_bit = i2c_read();
-        os_delay_us(I2C_SLEEP_TIME);
+        ets_delay_us(I2C_SLEEP_TIME);
 
         data_bit <<= (7 - i);
         data |= data_bit;
     }
     i2c_sck(0);
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
     
     return data;
 }
@@ -218,15 +218,15 @@ i2c_writeByte(uint8 data)
     uint8 data_bit;
     sint8 i;
 
-    os_delay_us(I2C_SLEEP_TIME);
+    ets_delay_us(I2C_SLEEP_TIME);
 
     for (i = 7; i >= 0; i--) {
         data_bit = data >> i;
         i2c_sda(data_bit);
-        os_delay_us(I2C_SLEEP_TIME);
+        ets_delay_us(I2C_SLEEP_TIME);
         i2c_sck(1);
-        os_delay_us(I2C_SLEEP_TIME);
+        ets_delay_us(I2C_SLEEP_TIME);
         i2c_sck(0);
-        os_delay_us(I2C_SLEEP_TIME);
+        ets_delay_us(I2C_SLEEP_TIME);
     }
 }
