@@ -62,6 +62,7 @@ void spi_master_write(uint8_t *data, uint32_t len)
 int main() {
 	int i = 0;
 	nosdk8266_init();
+	
 
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO2_U, FUNC_GPIO2);
 	PIN_FUNC_SELECT(PERIPHS_IO_MUX_GPIO5_U, FUNC_GPIO5);
