@@ -25,9 +25,23 @@ union spi_slave_status
 	uint8 byte_value;
 };
 
-#define SPI_FLASH_BYTES_LEN                24
+#define SPI_FLASH_BYTES_LEN               24
 #define IODATA_START_ADDR                 BIT0
-#define SPI_BUFF_BYTE_NUM                    32
+#define SPI_BUFF_BYTE_NUM                 32
+
+/**
+ * @brief The SPI module working speed.
+ * @attention Max speed 80MHz
+ */
+typedef enum {
+    spispeed_0_5MHz   = 160,
+    spispeed_1MHz     = 80,
+    spispeed_2MHz     = 40,
+    spispeed_5MHz     = 16,
+    spispeed_8MHz     = 10,
+    spispeed_10MHz    = 8,
+
+} spi_speed_t;
 
 /*SPI number define*/
 #define SPI 			0
@@ -35,7 +49,7 @@ union spi_slave_status
 
 void cache_flush(void);
 //spi master init funtion
-void spi_master_init(uint8 spi_no);
+void spi_master_init(uint8 spi_no, spi_speed_t speed);
 
 //lcd drive function
 void spi_lcd_9bit_write(uint8 spi_no,uint8 high_bit,uint8 low_8bit);

@@ -26,6 +26,7 @@
         "i2c.h": "c",
         "osapi.h": "c",
         "spi.h": "c",
-        "spi_overlap.h": "c"
+        "spi_overlap.h": "c",
+        "nosdk8266.h": "c"
     }
 }

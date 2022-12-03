@@ -28,7 +28,7 @@ void cache_flush(void)
  * Parameters   : uint8 spi_no - SPI module number, Only "SPI" and "HSPI" are valid
 *******************************************************************************/
 void ICACHE_FLASH_ATTR
-    spi_master_init(uint8 spi_no)
+    spi_master_init(uint8 spi_no, spi_speed_t speed)
 {
 	uint32 regvalue; 
 
@@ -55,14 +55,18 @@ void ICACHE_FLASH_ATTR
 	
 	//SET_PERI_REG_MASK(SPI_USER(spi_no), SPI_CS_SETUP|SPI_CS_HOLD);
 	//CLEAR_PERI_REG_MASK(SPI_USER(spi_no), SPI_FLASH_MODE|SPI_USR_COMMAND);
+	uint8_t i = 4, k = 40;
+	i = (speed / 40) ? (speed / 40) : 1;
+	k = speed / i;
 
 	SET_PERI_REG_MASK(SPI_USER(spi_no), SPI_CS_SETUP|SPI_CS_HOLD|SPI_USR_COMMAND);
 	CLEAR_PERI_REG_MASK(SPI_USER(spi_no), SPI_FLASH_MODE);
-
-	WRITE_PERI_REG(SPI_CLOCK(spi_no), 
-					((3&SPI_CLKCNT_N)<<SPI_CLKCNT_N_S)|
-					((1&SPI_CLKCNT_H)<<SPI_CLKCNT_H_S)|
-					((3&SPI_CLKCNT_L)<<SPI_CLKCNT_L_S)); //clear bit 31,set SPI clock div
+	// WRITE_PERI_REG(SPI_CLOCK(spi_no), 0x00049045);	// 0x00049045
+	uint32_t spi_clock = (((i - 1) & SPI_CLKDIV_PRE) << SPI_CLKDIV_PRE_S) |
+						 (((k - 1) & SPI_CLKCNT_N) << SPI_CLKCNT_N_S) | 
+						 ((((k + 1) / 2 - 1) & SPI_CLKCNT_H) << SPI_CLKCNT_H_S) | 
+						 (((k - 1) & SPI_CLKCNT_L) << SPI_CLKCNT_L_S);
+	WRITE_PERI_REG(SPI_CLOCK(spi_no), spi_clock); //clear bit 31,set SPI clock div
 
 }
 
