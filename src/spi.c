@@ -80,6 +80,7 @@ void spi_init(uint8 spi_no, spi_speed_t speed, SpiSubMode submode, SpiBitOrder b
 		return;
 	} //handle invalid input number
 
+	// TODO: experiment with submode settings
 	// Set SPI submode: SPI_CPOL & SPI_CPHA
     switch (submode)
 	{
@@ -98,7 +99,7 @@ void spi_init(uint8 spi_no, spi_speed_t speed, SpiSubMode submode, SpiBitOrder b
             CLEAR_PERI_REG_MASK(SPI_USER(spi_no),  SPI_CK_OUT_EDGE);
             break;
 
-        case SpiSubMode_0:
+        case SpiSubMode_0:	// The clock looks strange
         default:
             CLEAR_PERI_REG_MASK(SPI_PIN(spi_no), SPI_IDLE_EDGE);
             CLEAR_PERI_REG_MASK(SPI_USER(spi_no),  SPI_CK_OUT_EDGE);

@@ -4,6 +4,7 @@
 #include "nosdk8266.h"
 #include "timer.h"
 #include "spi.h"
+#include "pwm.h"
 //#include <math.h>
 
 #define DELAY 1000 /* milliseconds */
@@ -22,9 +23,9 @@
 
 LOCAL os_timer_t blink_timer;
 
-uint32 io_info[][3] = {   {PWM_0_OUT_IO_MUX,PWM_0_OUT_IO_FUNC,PWM_0_OUT_IO_NUM},
-       	                  {PWM_1_OUT_IO_MUX,PWM_1_OUT_IO_FUNC,PWM_1_OUT_IO_NUM},
-               	          {PWM_2_OUT_IO_MUX,PWM_2_OUT_IO_FUNC,PWM_2_OUT_IO_NUM},
+uint32 io_info[][3] = {   {PWM_0_OUT_IO_MUX, PWM_0_OUT_IO_FUNC, PWM_0_OUT_IO_NUM},
+       	                  {PWM_1_OUT_IO_MUX, PWM_1_OUT_IO_FUNC, PWM_1_OUT_IO_NUM},
+               	          {PWM_2_OUT_IO_MUX, PWM_2_OUT_IO_FUNC, PWM_2_OUT_IO_NUM},
 			};
 
 u32 duty[3] = {600,604,634};
@@ -74,19 +75,18 @@ int main() {
     hw_timer_arm(500000);
 
 	// PWM example
-	// pwm_init(1000, duty, 3, io_info);
-	// pwm_start();
+	pwm_init(1000, duty, 3, io_info);
+	pwm_start();
 
 	// SPI master example
-	// spi_master_init(HSPI, spispeed_2MHz);
-	spi_init(HSPI, spispeed_2MHz, SpiSubMode_1, SpiBitOrder_MSBFirst, SpiMode_Master);
+	// spi_init(HSPI, spispeed_2MHz, SpiSubMode_1, SpiBitOrder_MSBFirst, SpiMode_Master);
+	// spi_mast_byte_write(HSPI, 0xAA);
 
 
 	while(1)
 	{
 		// PIN_OUT_SET = _BV(2); //Turn GPIO2 light on.
 		call_delay_us(500000);
-		spi_mast_byte_write(HSPI, 0xAA);
 		// float aa = 12.34;
 		// printf("float test: %f\n", aa);
 		printf("Hello World %d\n", i);
