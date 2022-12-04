@@ -44,10 +44,10 @@ void hw_test_timer_cb(void)
 	}
 }
 
-void ICACHE_FLASH_ATTR spi_init()
-{
-    spi_test_init();
-}
+// void ICACHE_FLASH_ATTR spi_init()
+// {
+//     spi_test_init();
+// }
 
 void spi_master_write(uint8_t *data, uint32_t len)
 {
@@ -78,14 +78,15 @@ int main() {
 	// pwm_start();
 
 	// SPI master example
-	spi_master_init(HSPI, spispeed_2MHz);
+	// spi_master_init(HSPI, spispeed_2MHz);
+	spi_init(HSPI, spispeed_2MHz, SpiSubMode_1, SpiBitOrder_MSBFirst, SpiMode_Master);
 
 
 	while(1)
 	{
 		// PIN_OUT_SET = _BV(2); //Turn GPIO2 light on.
 		call_delay_us(500000);
-		spi_mast_byte_write(HSPI,0xAA);
+		spi_mast_byte_write(HSPI, 0xAA);
 		// float aa = 12.34;
 		// printf("float test: %f\n", aa);
 		printf("Hello World %d\n", i);

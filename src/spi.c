@@ -33,19 +33,19 @@ void ICACHE_FLASH_ATTR
 	uint32 regvalue; 
 
 	if(spi_no>1) {	
-
 		os_printf("invalid spi number!\n\r");
-
 		return;
-
 	} //handle invalid input number
 
-	 else if(spi_no==SPI){
+	if(spi_no==SPI)
+	{
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_SD_CLK_U, 1);//configure io to spi mode
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_SD_CMD_U, 1);//configure io to spi mode	
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_SD_DATA0_U, 1);//configure io to spi mode	
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_SD_DATA1_U, 1);//configure io to spi mode	
-    }else if(spi_no==HSPI){
+    }
+	else if(spi_no==HSPI)
+	{
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDI_U, 2);//configure io to Hspi mode
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U, 2);//configure io to Hspi mode	
         PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTMS_U, 2);//configure io to Hspi mode	
@@ -68,6 +68,143 @@ void ICACHE_FLASH_ATTR
 						 (((k - 1) & SPI_CLKCNT_L) << SPI_CLKCNT_L_S);
 	WRITE_PERI_REG(SPI_CLOCK(spi_no), spi_clock); //clear bit 31,set SPI clock div
 
+}
+
+void spi_init(uint8 spi_no, spi_speed_t speed, SpiSubMode submode, SpiBitOrder bit_order, SpiMode mode)
+{
+	uint32 regvalue;
+ 
+	if(spi_no>1)
+	{	
+		os_printf("invalid spi number!\n\r");
+		return;
+	} //handle invalid input number
+
+	// Set SPI submode: SPI_CPOL & SPI_CPHA
+    switch (submode)
+	{
+        case SpiSubMode_1:	// Norm
+            CLEAR_PERI_REG_MASK(SPI_PIN(spi_no), SPI_IDLE_EDGE);
+            SET_PERI_REG_MASK(SPI_USER(spi_no),  SPI_CK_OUT_EDGE); // CHPA_FALLING_EDGE_SAMPLE
+            break;
+
+        case SpiSubMode_2:	// WTF? clock is always on
+            SET_PERI_REG_MASK(SPI_PIN(spi_no), SPI_IDLE_EDGE);
+            SET_PERI_REG_MASK(SPI_USER(spi_no),  SPI_CK_OUT_EDGE); // CHPA_FALLING_EDGE_SAMPLE
+            break;
+
+        case SpiSubMode_3:	// Also works badly
+            SET_PERI_REG_MASK(SPI_PIN(spi_no), SPI_IDLE_EDGE);
+            CLEAR_PERI_REG_MASK(SPI_USER(spi_no),  SPI_CK_OUT_EDGE);
+            break;
+
+        case SpiSubMode_0:
+        default:
+            CLEAR_PERI_REG_MASK(SPI_PIN(spi_no), SPI_IDLE_EDGE);
+            CLEAR_PERI_REG_MASK(SPI_USER(spi_no),  SPI_CK_OUT_EDGE);
+            // To do nothing
+            break;
+    }
+	// set SPI bit order
+    if (SpiBitOrder_MSBFirst == bit_order)
+	{
+        CLEAR_PERI_REG_MASK(SPI_CTRL(spi_no), SPI_WR_BIT_ORDER);
+        CLEAR_PERI_REG_MASK(SPI_CTRL(spi_no), SPI_RD_BIT_ORDER);
+    }
+	else if (SpiBitOrder_LSBFirst == bit_order)
+	{
+        SET_PERI_REG_MASK(SPI_CTRL(spi_no), SPI_WR_BIT_ORDER);
+        SET_PERI_REG_MASK(SPI_CTRL(spi_no), SPI_RD_BIT_ORDER);
+    }
+	else
+        // To do nothing
+
+    // Disable flash operation mode
+    // As earlier as better, if not SPI_CTRL2 can not to be set delay cycles.
+    CLEAR_PERI_REG_MASK(SPI_USER(spi_no), SPI_FLASH_MODE);
+
+	// SPI mode type
+    if (SpiMode_Master == mode)
+	{
+		if(spi_no==SPI)
+		{
+			PIN_FUNC_SELECT(PERIPHS_IO_MUX_SD_CLK_U, 1);//configure io to spi mode
+			PIN_FUNC_SELECT(PERIPHS_IO_MUX_SD_CMD_U, 1);//configure io to spi mode	
+			PIN_FUNC_SELECT(PERIPHS_IO_MUX_SD_DATA0_U, 1);//configure io to spi mode	
+			PIN_FUNC_SELECT(PERIPHS_IO_MUX_SD_DATA1_U, 1);//configure io to spi mode	
+		}
+		else if(spi_no==HSPI)
+		{
+			PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDI_U, 2);//configure io to Hspi mode
+			PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTCK_U, 2);//configure io to Hspi mode	
+			PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTMS_U, 2);//configure io to Hspi mode	
+			PIN_FUNC_SELECT(PERIPHS_IO_MUX_MTDO_U, 2);//configure io to Hspi mode	
+		}
+        CLEAR_PERI_REG_MASK(SPI_SLAVE(spi_no), SPI_SLAVE_MODE);    // SPI mode type
+        // SPI Send buffer
+        CLEAR_PERI_REG_MASK(SPI_USER(spi_no), SPI_USR_MISO_HIGHPART); // By default slave send buffer C0-C7
+
+        // SPI Speed
+        if (1 < speed)
+		{
+			uint8_t i = 4, k = 40;
+			i = (speed / 40) ? (speed / 40) : 1;
+			k = speed / i;
+            CLEAR_PERI_REG_MASK(SPI_CLOCK(spi_no), SPI_CLK_EQU_SYSCLK);
+            // WRITE_PERI_REG(SPI_CLOCK(spi_no), 0x00049045);	// 0x00049045
+			uint32_t spi_clock = (((i - 1) & SPI_CLKDIV_PRE) << SPI_CLKDIV_PRE_S) |
+								 (((k - 1) & SPI_CLKCNT_N) << SPI_CLKCNT_N_S) | 
+								 ((((k + 1) / 2 - 1) & SPI_CLKCNT_H) << SPI_CLKCNT_H_S) | 
+								 (((k - 1) & SPI_CLKCNT_L) << SPI_CLKCNT_L_S);
+			WRITE_PERI_REG(SPI_CLOCK(spi_no), spi_clock); //clear bit 31,set SPI clock div
+        }
+		else
+            WRITE_PERI_REG(SPI_CLOCK(spi_no), SPI_CLK_EQU_SYSCLK); // 80Mhz speed
+
+        // By default format:CMD+ADDR+DATA
+        SET_PERI_REG_MASK(SPI_USER(spi_no), SPI_CS_SETUP | SPI_CS_HOLD | SPI_USR_MOSI);
+
+        //delay num
+        SET_PERI_REG_MASK(SPI_CTRL2(spi_no), ((0x1 & SPI_MISO_DELAY_NUM) << SPI_MISO_DELAY_NUM_S));
+    }
+	else if (SpiMode_Slave == mode)
+	{
+        // BIT19 must do
+        SET_PERI_REG_MASK(SPI_PIN(spi_no), BIT19);
+
+        // SPI mode type
+        SET_PERI_REG_MASK(SPI_SLAVE(spi_no), SPI_SLAVE_MODE);
+        // SPI Send buffer
+        SET_PERI_REG_MASK(SPI_USER(spi_no), SPI_USR_MISO_HIGHPART);// By default slave send buffer C8-C15
+
+        SET_PERI_REG_MASK(SPI_USER(spi_no), SPI_USR_MOSI);
+
+        // If do not set delay cycles, slave not working,master cann't get the data.
+        SET_PERI_REG_MASK(SPI_CTRL2(spi_no), ((0x1 & SPI_MOSI_DELAY_NUM) << SPI_MOSI_DELAY_NUM_S)); //delay num
+        // SPI Speed
+        WRITE_PERI_REG(SPI_CLOCK(spi_no), 0);
+
+        // By default format::CMD(8bits)+ADDR(8bits)+DATA(32bytes).
+        SET_PERI_REG_BITS(SPI_USER2(spi_no), SPI_USR_COMMAND_BITLEN, 7, SPI_USR_COMMAND_BITLEN_S);
+        SET_PERI_REG_BITS(SPI_SLAVE1(spi_no), SPI_SLV_WR_ADDR_BITLEN, 7, SPI_SLV_WR_ADDR_BITLEN_S);
+        SET_PERI_REG_BITS(SPI_SLAVE1(spi_no), SPI_SLV_RD_ADDR_BITLEN, 7, SPI_SLV_RD_ADDR_BITLEN_S);
+        SET_PERI_REG_BITS(SPI_SLAVE1(spi_no), SPI_SLV_BUF_BITLEN, (32 * 8 - 1), SPI_SLV_BUF_BITLEN_S);
+        // For 8266 work on slave mode.
+        SET_PERI_REG_BITS(SPI_SLAVE1(spi_no), SPI_SLV_STATUS_BITLEN, 7, SPI_SLV_STATUS_BITLEN_S);
+    }
+	else{}
+        // To do nothing
+	//clear Daul or Quad lines transmission mode
+    CLEAR_PERI_REG_MASK(SPI_CTRL(spi_no), SPI_QIO_MODE | SPI_DIO_MODE | SPI_DOUT_MODE | SPI_QOUT_MODE);
+    
+	// Clear the data buffer.
+    uint32_t regAddr = REG_SPI_BASE(spi_no) + 0x40;
+
+    for(uint8_t i = 0; i < 16; ++i)
+	{
+        WRITE_PERI_REG(regAddr, 0);
+        regAddr += 4;
+    }
 }
 
  /******************************************************************************

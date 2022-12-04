@@ -43,6 +43,57 @@ typedef enum {
 
 } spi_speed_t;
 
+/**
+ * @brief The SPI module can work in either master or slave mode.
+ *
+ */
+typedef enum {
+    SpiMode_Master = 0,
+    SpiMode_Slave  = 1,
+} SpiMode;
+
+/**
+ *  @brief SPI sub mode
+ *
+ * Support 4 sub modes based on SPI clock polarity and phase.
+ * SPI_CPOL SPI_CPHA  SubMode
+ *   0        0        0
+ *   0        1        1
+ *   1        0        2
+ *   1        1        3
+ */
+typedef enum {
+    SpiSubMode_0 = 0,
+    SpiSubMode_1 = 1,
+    SpiSubMode_2 = 2,
+    SpiSubMode_3 = 3,
+} SpiSubMode;
+
+/**
+ * @brief The SPI mode working speed.
+ *
+ */
+typedef enum {
+    SpiBitOrder_MSBFirst = 0,
+    SpiBitOrder_LSBFirst = 1,
+} SpiBitOrder;
+
+// @brief SPI interrupt soource defined.
+typedef enum {
+    SpiIntSrc_TransDone = SPI_TRANS_DONE,
+    SpiIntSrc_WrStaDone = SPI_SLV_WR_STA_DONE,
+    SpiIntSrc_RdStaDone = SPI_SLV_RD_STA_DONE,
+    SpiIntSrc_WrBufDone = SPI_SLV_WR_BUF_DONE,
+    SpiIntSrc_RdBufDone = SPI_SLV_RD_BUF_DONE,
+} SpiIntSrc;
+
+// @brief SPI CS pin.
+typedef enum {
+    SpiPinCS_0 = 1,
+    SpiPinCS_1 = 2,
+    SpiPinCS_2 = 4,
+} SpiPinCS;
+
 /*SPI number define*/
 #define SPI 			0
 #define HSPI			1
@@ -50,6 +101,8 @@ typedef enum {
 void cache_flush(void);
 //spi master init funtion
 void spi_master_init(uint8 spi_no, spi_speed_t speed);
+void spi_init(uint8 spi_no, spi_speed_t speed, SpiSubMode submode, SpiBitOrder bit_order, SpiMode mode);
+
 
 //lcd drive function
 void spi_lcd_9bit_write(uint8 spi_no,uint8 high_bit,uint8 low_8bit);
