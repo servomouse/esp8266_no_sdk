@@ -75,24 +75,24 @@ int main() {
     hw_timer_arm(500000);
 
 	// PWM example
-	pwm_init(1000, duty, 3, io_info);
-	pwm_start();
+	// pwm_init(1000, duty, 3, io_info);
+	// pwm_start();
 
 	// SPI master example
-	// spi_init(HSPI, spispeed_2MHz, SpiSubMode_1, SpiBitOrder_MSBFirst, SpiMode_Master);
-	// spi_mast_byte_write(HSPI, 0xAA);
+	spi_init(HSPI, spispeed_2MHz, SpiSubMode_1, SpiBitOrder_MSBFirst, SpiMode_Master);
+	spi_mast_byte_write(HSPI, 0xAA);
 
 
 	while(1)
 	{
 		// PIN_OUT_SET = _BV(2); //Turn GPIO2 light on.
-		call_delay_us(500000);
+		delay_us(500000);
 		// float aa = 12.34;
 		// printf("float test: %f\n", aa);
 		printf("Hello World %d\n", i);
 		// printf("PLL divider register values: (1)0x%x | (2)0x%x\n", rom_i2c_readReg(103, 4, 1), rom_i2c_readReg(103, 4, 2));
 		// PIN_OUT_CLEAR = _BV(2); //Turn GPIO2 light off.
-		call_delay_us(500000);
+		delay_us(500000);
 		i++;
 	}
 }

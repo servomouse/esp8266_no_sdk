@@ -1,86 +1,48 @@
-#ifndef TIMER0_H
-#define TIMER0_H
+#pragma once
 
 #include "ets_sys.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+typedef void ETSTimerFunc(void *timer_arg);
 
-// simple blocking delay
-inline void call_delay_us(uint32_t time)
+typedef struct _ETSTIMER_
 {
-	asm volatile("mov.n a2, %0\n_call0 delay4clk" : : "r"(time * (MAIN_MHZ / 8)) : "a2" );
-}
+    struct _ETSTIMER_    *timer_next;
+    uint32_t              timer_expire;
+    uint32_t              timer_period;
+    ETSTimerFunc         *timer_func;
+    void                 *timer_arg;
+} ETSTimer;
 
-/* timer related */
 typedef void os_timer_func_t(void *timer_arg);
 typedef void (*callback_with_arg_t)(void*);
 
-typedef struct _os_timer_t {
+typedef struct _os_timer_t
+{
     struct _os_timer_t *timer_next;
     void               *timer_handle;
-    uint32_t             timer_expire;
-    uint32_t             timer_period;
+    uint32_t            timer_expire;
+    uint32_t            timer_period;
     os_timer_func_t    *timer_func;
-    bool               timer_repeat_flag;
+    bool                timer_repeat_flag;
     void               *timer_arg;
 } os_timer_t;
 
-/** @addtogroup Timer_APIs
-  * @{
-  */
-
-/**
-  * @brief     Set the timer callback function.
-  *
-  * @attention 1. The callback function must be set in order to enable the timer.
-  * @attention 2. Operating system scheduling is disabled in timer callback.
-  *
-  * @param     os_timer_t *ptimer : Timer structure
-  * @param     os_timer_func_t *pfunction : timer callback function
-  * @param     void *parg : callback function parameter
-  *
-  * @return    null
-  */
-void timer_setfn(os_timer_t *ptimer, os_timer_func_t *pfunction, void *parg);
-
-/**
-  * @brief  Enable the millisecond timer.
-  *
-  * @param  os_timer_t *ptimer : timer structure
-  * @param  uint32_t milliseconds : Timing, unit: millisecond, range: 5 ~ 0x68DB8
-  * @param  bool repeat_flag : Whether the timer will be invoked repeatedly or not
-  *
-  * @return null
-  */
-void timer_arm(os_timer_t *ptimer, uint32_t msec, bool repeat_flag);
-
-/**
-  * @brief  Disarm the timer
-  *
-  * @param  os_timer_t *ptimer : Timer structure
-  *
-  * @return null
-  */
-void timer_disarm(os_timer_t *ptimer);
-
-
-void timer_attach(uint32_t milliseconds, bool repeat, callback_with_arg_t callback, void* arg);
-
 //TIMER PREDIVED MODE
-typedef enum {
+typedef enum
+{
     DIVDED_BY_1 = 0,		//timer clock
     DIVDED_BY_16 = 4,	//divided by 16
     DIVDED_BY_256 = 8,	//divided by 256
 } TIMER_PREDIVED_MODE;
 
-typedef enum {			//timer interrupt mode
+typedef enum
+{			//timer interrupt mode
     TM_LEVEL_INT = 1,	// level interrupt
     TM_EDGE_INT   = 0,	//edge interrupt
 } TIMER_INT_MODE;
 
-typedef enum {
+typedef enum
+{
     FRC1_SOURCE = 0,
     NMI_SOURCE = 1,
 } FRC1_TIMER_SOURCE_TYPE;
@@ -89,9 +51,24 @@ void ICACHE_FLASH_ATTR hw_timer_init(bool repeat);
 void  hw_timer_arm(uint32_t val);
 void  hw_timer_set_func(void (* user_hw_timer_cb_set)(void));
 
-#ifdef __cplusplus
+// simple blocking delays
+void delay_us(uint32_t us);
+void delay_ms(uint32_t ms);
+
+
+//------------------------------- Test Code --------------------------------------
+#if 0
+void cool_cb(void)
+{
+  ;// Some important work
+}
+
+void main(void)
+{
+  // cool_cb() will be called every 500 ms
+  hw_timer_init(true);        // init timer in repeated mode
+  hw_timer_set_func(cool_cb); // set callback
+  hw_timer_arm(500000);       // set period 500ms
 }
 #endif
 
-
-#endif
